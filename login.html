@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Portal | Magnus Academy</title>
+<link rel="stylesheet" href="css/style.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  .portal-wrap { max-width: 480px; margin: 60px auto; padding: 32px; }
+  .portal-card { border: 1px solid #ddd; border-radius: 12px; padding: 28px; }
+  .portal-card h2 { margin-top: 0; }
+  .portal-field { margin-bottom: 14px; }
+  .portal-field label { display: block; font-size: 0.9em; margin-bottom: 4px; }
+  .portal-field input { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ccc; box-sizing: border-box; }
+  .portal-btn { width: 100%; padding: 12px; border-radius: 6px; border: none; background: #1a1a2e; color: #fff; cursor: pointer; font-weight: 600; }
+  .portal-toggle { text-align: center; margin-top: 14px; font-size: 0.9em; }
+  .portal-toggle a { cursor: pointer; text-decoration: underline; }
+  .portal-msg { padding: 10px; border-radius: 6px; margin-bottom: 14px; font-size: 0.9em; }
+  .portal-msg.error { background: #fdecea; color: #a33; }
+  .portal-msg.success { background: #eaf7ea; color: #2a7; }
+  table.marks-table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+  table.marks-table th, table.marks-table td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 0.9em; }
+  #uploadStatus { margin-top: 10px; font-size: 0.9em; }
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html">Home</a>
+  <a href="courses.html">Courses</a>
+  <a href="faculty.html">Faculty</a>
+  <a href="results.html">Results</a>
+  <a href="login.html">Student Portal</a>
+</nav>
+
+<div class="portal-wrap">
+
+  <!-- AUTH FORM -->
+  <div id="authView" class="portal-card">
+    <h2 id="authTitle">Log In</h2>
+    <div id="authMsg"></div>
+    <div class="portal-field">
+      <label>Email</label>
+      <input type="email" id="emailInput" placeholder="you@example.com">
+    </div>
+    <div class="portal-field">
+      <label>Password</label>
+      <input type="password" id="passwordInput" placeholder="••••••••">
+    </div>
+    <div class="portal-field hidden" id="rollNumberField">
+      <label>Roll Number <span style="font-weight:400;">(students only — leave blank if you're staff)</span></label>
+      <input type="text" id="rollNumberInput" placeholder="e.g. 24BIO045">
+    </div>
+    <button class="portal-btn" id="authSubmitBtn">Log In</button>
+    <div class="portal-toggle">
+      <span id="toggleText">Don't have an account? <a id="toggleLink">Sign up</a></span>
+    </div>
+  </div>
+
+  <!-- NOT REGISTERED VIEW -->
+  <div id="notRegisteredView" class="portal-card hidden">
+    <h2>Account not registered</h2>
+    <p>Your email isn't on file as a student or staff member. Please contact the school office to be added, then log in again.</p>
+    <button class="portal-btn" id="signOutBtn1">Sign Out</button>
+  </div>
+
+  <!-- STUDENT DASHBOARD -->
+  <div id="studentView" class="portal-card hidden">
+    <h2>My Marks</h2>
+    <p id="studentGreeting"></p>
+    <table class="marks-table" id="marksTable">
+      <thead><tr><th>Exam</th><th>Subject</th><th>Marks</th><th>Max</th></tr></thead>
+      <tbody id="marksBody"></tbody>
+    </table>
+    <button class="portal-btn" id="signOutBtn2" style="margin-top:20px;">Sign Out</button>
+  </div>
+
+  <!-- STAFF DASHBOARD -->
+  <div id="staffView" class="portal-card hidden">
+    <h2>Staff Upload</h2>
+    <p id="staffGreeting"></p>
+    <p style="font-size:0.9em;">Upload a CSV/Excel file with columns: <code>roll_number, subject, exam_name, marks_obtained, max_marks</code></p>
+    <input type="file" id="fileInput" accept=".csv,.xlsx,.xls">
+    <button class="portal-btn" id="uploadBtn" style="margin-top:12px;">Upload Marks</button>
+    <div id="uploadStatus"></div>
+    <button class="portal-btn" id="signOutBtn3" style="margin-top:20px;">Sign Out</button>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script>
+// ====== CONFIG: replace with your actual Supabase project values ======
+const SUPABASE_URL = "https://ahtfvmawujnpodjboiqo.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFodGZ2bWF3dWpucG9kamJvaXFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg5MzA4ODMsImV4cCI6MjEwNDUwNjg4M30.ex6dFn4qdLi3O9miTlUQTlFKpliL0Kv9KdoMDONrWKQ";
+// ========================================================================
+
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let isSignup = false;
+
+const authView = document.getElementById('authView');
+const notRegisteredView = document.getElementById('notRegisteredView');
+const studentView = document.getElementById('studentView');
+const staffView = document.getElementById('staffView');
+const authMsg = document.getElementById('authMsg');
+const authTitle = document.getElementById('authTitle');
+const authSubmitBtn = document.getElementById('authSubmitBtn');
+const toggleText = document.getElementById('toggleText');
+const toggleLink = document.getElementById('toggleLink');
+
+function showMsg(text, type) {
+  authMsg.innerHTML = `<div class="portal-msg ${type}">${text}</div>`;
+}
+function clearMsg() { authMsg.innerHTML = ''; }
+
+function hideAll() {
+  authView.classList.add('hidden');
+  notRegisteredView.classList.add('hidden');
+  studentView.classList.add('hidden');
+  staffView.classList.add('hidden');
+}
+
+const rollNumberField = document.getElementById('rollNumberField');
+
+function handleToggleClick() {
+  isSignup = !isSignup;
+  authTitle.textContent = isSignup ? 'Sign Up' : 'Log In';
+  authSubmitBtn.textContent = isSignup ? 'Sign Up' : 'Log In';
+  toggleText.innerHTML = isSignup
+    ? `Already have an account? <a id="toggleLink">Log in</a>`
+    : `Don't have an account? <a id="toggleLink">Sign up</a>`;
+  rollNumberField.classList.toggle('hidden', !isSignup);
+  document.getElementById('toggleLink').addEventListener('click', handleToggleClick);
+  clearMsg();
+}
+toggleLink.addEventListener('click', handleToggleClick);
+
+authSubmitBtn.addEventListener('click', async () => {
+  const email = document.getElementById('emailInput').value.trim();
+  const password = document.getElementById('passwordInput').value;
+  clearMsg();
+
+  if (!email || !password) {
+    showMsg('Please enter both email and password.', 'error');
+    return;
+  }
+
+  if (isSignup) {
+    const enteredRoll = document.getElementById('rollNumberInput').value.trim();
+    const { data, error } = await supabase.auth.signUp({ email, password });
+    if (error) { showMsg(error.message, 'error'); return; }
+    showMsg('Account created. Checking registration...', 'success');
+    await routeAfterAuth(enteredRoll);
+  } else {
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) { showMsg(error.message, 'error'); return; }
+    await routeAfterAuth(null); // no roll-number check on ordinary login, already verified at signup
+  }
+});
+
+async function routeAfterAuth(enteredRoll) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+
+  // Check admins table first (staff don't need a roll number)
+  const { data: adminRow } = await supabase
+    .from('admins')
+    .select('*')
+    .eq('email', user.email)
+    .maybeSingle();
+
+  if (adminRow) {
+    hideAll();
+    staffView.classList.remove('hidden');
+    document.getElementById('staffGreeting').textContent = `Logged in as ${adminRow.full_name || user.email}`;
+    return;
+  }
+
+  // Check students table
+  const { data: studentRow } = await supabase
+    .from('students')
+    .select('*')
+    .eq('email', user.email)
+    .maybeSingle();
+
+  if (studentRow) {
+    // If this was a signup (enteredRoll is not null), the roll number must match too
+    if (enteredRoll !== null && enteredRoll !== studentRow.roll_number) {
+      await supabase.auth.signOut();
+      hideAll();
+      authView.classList.remove('hidden');
+      showMsg("That roll number doesn't match our records for this email. Please check and try again, or contact the office.", 'error');
+      return;
+    }
+    hideAll();
+    studentView.classList.remove('hidden');
+    document.getElementById('studentGreeting').textContent = `Welcome, ${studentRow.full_name}`;
+    await loadMarks(studentRow.roll_number);
+    return;
+  }
+
+  // Not found in either table
+  hideAll();
+  notRegisteredView.classList.remove('hidden');
+}
+
+async function loadMarks(rollNumber) {
+  const { data: marks, error } = await supabase
+    .from('marks')
+    .select('*')
+    .eq('roll_number', rollNumber);
+
+  const tbody = document.getElementById('marksBody');
+  tbody.innerHTML = '';
+  if (marks && marks.length) {
+    marks.forEach(m => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${m.exam_name}</td><td>${m.subject}</td><td>${m.marks_obtained}</td><td>${m.max_marks}</td>`;
+      tbody.appendChild(tr);
+    });
+  } else {
+    tbody.innerHTML = '<tr><td colspan="4">No marks uploaded yet.</td></tr>';
+  }
+}
+
+// Staff upload handling
+document.getElementById('uploadBtn').addEventListener('click', () => {
+  const fileInput = document.getElementById('fileInput');
+  const status = document.getElementById('uploadStatus');
+  const file = fileInput.files[0];
+  if (!file) { status.textContent = 'Please choose a file first.'; return; }
+
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    const wb = XLSX.read(e.target.result, { type: 'binary' });
+    const sheet = wb.Sheets[wb.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(sheet);
+
+    if (!rows.length) { status.textContent = 'No rows found in file.'; return; }
+
+    const records = rows.map(r => ({
+      roll_number: String(r.roll_number).trim(),
+      subject: r.subject,
+      exam_name: r.exam_name,
+      marks_obtained: Number(r.marks_obtained),
+      max_marks: Number(r.max_marks)
+    }));
+
+    status.textContent = `Uploading ${records.length} rows...`;
+    const { error } = await supabase.from('marks').insert(records);
+    if (error) {
+      status.textContent = 'Upload failed: ' + error.message;
+    } else {
+      status.textContent = `Successfully uploaded ${records.length} rows.`;
+    }
+  };
+  reader.readAsBinaryString(file);
+});
+
+// Sign out
+['signOutBtn1', 'signOutBtn2', 'signOutBtn3'].forEach(id => {
+  document.getElementById(id).addEventListener('click', async () => {
+    await supabase.auth.signOut();
+    hideAll();
+    authView.classList.remove('hidden');
+    document.getElementById('emailInput').value = '';
+    document.getElementById('passwordInput').value = '';
+    clearMsg();
+  });
+});
+
+// On page load, check if already logged in
+(async () => {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session) {
+    hideAll();
+    await routeAfterAuth(null);
+  }
+})();
+</script>
+
+</body>
+</html>
