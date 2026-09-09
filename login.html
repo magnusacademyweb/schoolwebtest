@@ -97,7 +97,7 @@ const SUPABASE_URL = "https://ahtfvmawujnpodjboiqo.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFodGZ2bWF3dWpucG9kamJvaXFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg5MzA4ODMsImV4cCI6MjEwNDUwNjg4M30.ex6dFn4qdLi3O9miTlUQTlFKpliL0Kv9KdoMDONrWKQ";
 // ========================================================================
 
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let isSignup = false;
 
@@ -150,23 +150,23 @@ authSubmitBtn.addEventListener('click', async () => {
 
   if (isSignup) {
     const enteredRoll = document.getElementById('rollNumberInput').value.trim();
-    const { data, error } = await supabase.auth.signUp({ email, password });
+    const { data, error } = await supabaseClient.auth.signUp({ email, password });
     if (error) { showMsg(error.message, 'error'); return; }
     showMsg('Account created. Checking registration...', 'success');
     await routeAfterAuth(enteredRoll);
   } else {
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
     if (error) { showMsg(error.message, 'error'); return; }
     await routeAfterAuth(null); // no roll-number check on ordinary login, already verified at signup
   }
 });
 
 async function routeAfterAuth(enteredRoll) {
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data: { user } } = await supabaseClient.auth.getUser();
   if (!user) return;
 
   // Check admins table first (staff don't need a roll number)
-  const { data: adminRow } = await supabase
+  const { data: adminRow } = await supabaseClient
     .from('admins')
     .select('*')
     .eq('email', user.email)
@@ -180,7 +180,7 @@ async function routeAfterAuth(enteredRoll) {
   }
 
   // Check students table
-  const { data: studentRow } = await supabase
+  const { data: studentRow } = await supabaseClient
     .from('students')
     .select('*')
     .eq('email', user.email)
@@ -189,7 +189,7 @@ async function routeAfterAuth(enteredRoll) {
   if (studentRow) {
     // If this was a signup (enteredRoll is not null), the roll number must match too
     if (enteredRoll !== null && enteredRoll !== studentRow.roll_number) {
-      await supabase.auth.signOut();
+      await supabaseClient.auth.signOut();
       hideAll();
       authView.classList.remove('hidden');
       showMsg("That roll number doesn't match our records for this email. Please check and try again, or contact the office.", 'error');
@@ -208,7 +208,7 @@ async function routeAfterAuth(enteredRoll) {
 }
 
 async function loadMarks(rollNumber) {
-  const { data: marks, error } = await supabase
+  const { data: marks, error } = await supabaseClient
     .from('marks')
     .select('*')
     .eq('roll_number', rollNumber);
@@ -250,7 +250,7 @@ document.getElementById('uploadBtn').addEventListener('click', () => {
     }));
 
     status.textContent = `Uploading ${records.length} rows...`;
-    const { error } = await supabase.from('marks').insert(records);
+    const { error } = await supabaseClient.from('marks').insert(records);
     if (error) {
       status.textContent = 'Upload failed: ' + error.message;
     } else {
@@ -263,7 +263,7 @@ document.getElementById('uploadBtn').addEventListener('click', () => {
 // Sign out
 ['signOutBtn1', 'signOutBtn2', 'signOutBtn3'].forEach(id => {
   document.getElementById(id).addEventListener('click', async () => {
-    await supabase.auth.signOut();
+    await supabaseClient.auth.signOut();
     hideAll();
     authView.classList.remove('hidden');
     document.getElementById('emailInput').value = '';
@@ -274,7 +274,7 @@ document.getElementById('uploadBtn').addEventListener('click', () => {
 
 // On page load, check if already logged in
 (async () => {
-  const { data: { session } } = await supabase.auth.getSession();
+  const { data: { session } } = await supabaseClient.auth.getSession();
   if (session) {
     hideAll();
     await routeAfterAuth(null);
