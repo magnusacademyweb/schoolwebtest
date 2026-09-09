@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Results — Magnus Academy</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    .intro { max-width: 560px; }
+    .stats { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-top:64px; }
+    .stat { padding:24px; border:1px solid var(--line); border-radius:20px; background:var(--surface); box-shadow:var(--shadow); }
+    .stat-value { font-size:2.6rem; font-weight:800; letter-spacing:-.07em; }
+    .stat-value span { color:var(--cyan); }
+    .stat-label { margin-top:15px; font-size:.72rem; font-weight:800; }
+    .stat-sub { margin-top:5px; color:var(--muted); font-size:.65rem; }
+    .trajectory { display:grid; grid-template-columns:.78fr 1.22fr; gap:28px; align-items:center; margin-top:68px; }
+    .trajectory-copy h2 { max-width:370px; margin:15px 0 0; font-size:2.8rem; line-height:.98; letter-spacing:-.06em; }
+    .trajectory-copy p { max-width:390px; margin:22px 0 0; color:var(--muted); font-size:.86rem; line-height:1.75; }
+    .chart { padding:28px; border:1px solid var(--line); border-radius:26px; background:var(--surface); box-shadow:var(--shadow); }
+    .chart-head { display:flex; justify-content:space-between; gap:20px; font-size:.72rem; font-weight:800; }
+    .chart-head span { color:var(--cyan); font:600 .68rem ui-monospace,SFMono-Regular,Menlo,monospace; }
+    .chart-box { position:relative; height:240px; margin:30px 0 0 28px; border-left:1px solid var(--line); border-bottom:1px solid var(--line); background:repeating-linear-gradient(to bottom,transparent 0,transparent 59px,var(--line) 60px); }
+    .chart-box::before { content:"70                 85                 99"; position:absolute; top:-18px; left:-26px; width:calc(100% + 25px); color:var(--muted); font:600 .57rem ui-monospace,SFMono-Regular,Menlo,monospace; word-spacing:34px; white-space:nowrap; }
+    .chart-line { position:absolute; inset:20px 0 0; width:100%; height:calc(100% - 20px); overflow:visible; }
+    .chart-labels { display:flex; justify-content:space-between; margin:12px 0 0 28px; color:var(--muted); font:600 .6rem ui-monospace,SFMono-Regular,Menlo,monospace; }
+    .stories { margin-top:76px; }
+    .stories-head { display:flex; align-items:end; justify-content:space-between; gap:20px; }
+    .stories-head h2 { margin:14px 0 0; font-size:2.8rem; line-height:.98; letter-spacing:-.06em; }
+    .stories-link { color:var(--blue); font-size:.75rem; font-weight:800; }
+    .story-list { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; margin-top:30px; align-items:stretch; }
+    .story { display:flex; flex-direction:column; min-width:0; padding:16px; border:1px solid var(--line); border-radius:22px; background:var(--surface); box-shadow:var(--shadow); }
+    .story-portrait { display:grid; place-items:center; min-height:205px; border-radius:16px; background:radial-gradient(circle at 50% 32%,rgba(255,255,255,.5),transparent 23%),linear-gradient(145deg,rgba(70,217,255,.75),rgba(119,100,235,.85)); color:#fff; font-size:4.2rem; font-weight:800; letter-spacing:-.09em; overflow:hidden; }
+    .story:nth-child(2) .story-portrait { background:radial-gradient(circle at 50% 32%,rgba(255,255,255,.42),transparent 23%),linear-gradient(145deg,rgba(255,181,71,.88),rgba(244,99,139,.86)); }
+    .story:nth-child(3) .story-portrait { background:radial-gradient(circle at 50% 32%,rgba(255,255,255,.5),transparent 23%),linear-gradient(145deg,rgba(83,205,156,.86),rgba(28,145,177,.88)); }
+    .story-body { display:flex; flex:1; flex-direction:column; padding:21px 5px 5px; }
+    .story-exam { color:var(--muted); font-size:.62rem; font-weight:800; letter-spacing:.12em; text-transform:uppercase; }
+    .story-name { margin-top:8px; font-size:1.15rem; font-weight:800; letter-spacing:-.03em; }
+    .quote { margin:13px 0 21px; color:var(--muted); font-size:.78rem; line-height:1.7; }
+    .selection { margin-top:auto; padding:15px; border-radius:14px; background:rgba(22,185,220,.1); }
+    .selection-label { color:var(--cyan); font-size:.62rem; font-weight:800; letter-spacing:.1em; text-transform:uppercase; }
+    .selection-value { margin-top:6px; font-size:.9rem; font-weight:800; line-height:1.35; }
+    .percentile { margin-top:11px; color:var(--ink); font-size:1.15rem; font-weight:800; letter-spacing:-.04em; }
+    .percentile span { color:var(--cyan); }
+    @media(max-width:1050px) { .stats{grid-template-columns:repeat(2,1fr)}.trajectory{grid-template-columns:1fr}.story-list{grid-template-columns:repeat(2,minmax(0,1fr))} }
+    @media(max-width:760px) { .stats{grid-template-columns:1fr 1fr;margin-top:46px}.stat{padding:18px}.stat-value{font-size:2rem}.trajectory{margin-top:52px}.trajectory-copy h2,.stories-head h2{font-size:2.35rem}.chart{padding:18px}.story-list{grid-template-columns:1fr;gap:16px}.story-portrait{min-height:230px}.story-body{padding:20px 4px 4px} }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 26 26" fill="none"><circle cx="13" cy="13" r="3" fill="currentColor"/><ellipse cx="13" cy="13" rx="11.5" ry="4.7" stroke="#46D9FF" stroke-width="1.2"/><ellipse cx="13" cy="13" rx="11.5" ry="4.7" stroke="#328BFF" stroke-width="1.2" transform="rotate(60 13 13)"/><ellipse cx="13" cy="13" rx="11.5" ry="4.7" stroke="#8F7BFF" stroke-width="1.2" transform="rotate(120 13 13)"/></svg></span>MAGNUS</a>
+      <nav><a href="index.html">Home</a><a href="faculty.html">Faculty</a><a href="courses.html">Courses</a><a class="login-link" href="login.html">Student login ↗</a><button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle theme">☼</button></nav>
+      <button class="mobile-menu-toggle" id="mobile-menu-toggle" type="button" aria-label="Open navigation" aria-expanded="false">☰</button>
+      <div class="mobile-menu" id="mobile-menu"><a href="index.html">Home <span>↗</span></a><a href="faculty.html">Faculty <span>↗</span></a><a href="courses.html">Courses <span>↗</span></a><a href="login.html">Student login <span>↗</span></a></div>
+    </header>
+    <main>
+      <div class="kicker eyebrow">The numbers, without the theatre</div>
+      <h1>Proof you can<br /><span class="gradient">feel in the work.</span></h1>
+      <p class="intro">A result is the final frame. We track the hundreds of honest, measurable decisions that lead there.</p>
+      <section class="stats" aria-label="Magnus results">
+        <article class="stat"><div class="stat-value">64</div><div class="stat-label">top 1% ranks</div><div class="stat-sub">JEE + NEET · 2024</div></article>
+        <article class="stat"><div class="stat-value">312</div><div class="stat-label">top 5% ranks</div><div class="stat-sub">Across all cohorts</div></article>
+        <article class="stat"><div class="stat-value">31<span>%</span></div><div class="stat-label">average score lift</div><div class="stat-sub">First 90 days</div></article>
+        <article class="stat"><div class="stat-value">4.82<span>/5</span></div><div class="stat-label">student rating</div><div class="stat-sub">From 1,106 reviews</div></article>
+      </section>
+      <section class="trajectory">
+        <div class="trajectory-copy"><div class="eyebrow">The trajectory</div><h2>Small gains<br />compound.</h2><p>Median percentile across the 12-week Rank Track cohort. No cherry-picking — every student who completed the loop is in the line.</p></div>
+        <div class="chart"><div class="chart-head">Median percentile <span>12 weeks</span></div><div class="chart-box"><svg class="chart-line" viewBox="0 0 600 210" preserveAspectRatio="none" aria-label="Rising median percentile chart"><defs><linearGradient id="lineFill" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#46d9ff" stop-opacity=".28"/><stop offset="1" stop-color="#46d9ff" stop-opacity="0"/></linearGradient></defs><path d="M0,190 C55,184 55,168 102,164 S158,152 202,144 S251,143 300,111 S344,104 398,82 S460,72 506,47 S560,30 600,18 L600,210 L0,210 Z" fill="url(#lineFill)"/><path d="M0,190 C55,184 55,168 102,164 S158,152 202,144 S251,143 300,111 S344,104 398,82 S460,72 506,47 S560,30 600,18" fill="none" stroke="#46d9ff" stroke-width="4"/></svg></div><div class="chart-labels"><span>W1</span><span>W4</span><span>W8</span><span>W12</span></div></div>
+      </section>
+      <section class="stories"><div class="stories-head"><div><div class="eyebrow">Student stories</div><h2>Their work.<br />Their words.</h2></div><a class="stories-link" href="#">Build your trajectory ↗</a></div><div class="story-list">
+        <article class="story"><div class="story-portrait" aria-hidden="true">IM</div><div class="story-body"><div class="story-exam">JEE Advanced 2024</div><div class="story-name">Ira Menon</div><p class="quote">"The biggest change was knowing what not to study. My mentor cut the noise and gave me back my evenings."</p><div class="selection"><div class="selection-label">Selected at</div><div class="selection-value">IIT Bombay</div><div class="percentile"><span>99.74</span> percentile</div></div></div></article>
+        <article class="story"><div class="story-portrait" aria-hidden="true">RB</div><div class="story-body"><div class="story-exam">NEET UG 2024</div><div class="story-name">Rohan Bedi</div><p class="quote">"I stopped treating every bad mock like a crisis. We reviewed the pattern, fixed one thing, and went again."</p><div class="selection"><div class="selection-label">Selected at</div><div class="selection-value">AIIMS New Delhi</div><div class="percentile"><span>99.82</span> percentile</div></div></div></article>
+        <article class="story"><div class="story-portrait" aria-hidden="true">SR</div><div class="story-body"><div class="story-exam">JEE Main 2024</div><div class="story-name">Saanvi Rao</div><p class="quote">"There was always someone who knew the exact question I was stuck on. That made hard weeks feel manageable."</p><div class="selection"><div class="selection-label">Selected at</div><div class="selection-value">IIT Delhi</div><div class="percentile"><span>99.52</span> percentile</div></div></div></article>
+      </div></section>
+    </main>
+    <footer><span>MAGNUS ACADEMY · PRECISION COACHING</span><span>JEE · NEET · CONSISTENCY</span></footer>
+  </div>
+  <script src="js/site.js"></script>
+</body>
+</html>

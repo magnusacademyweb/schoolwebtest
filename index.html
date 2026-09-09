@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Magnus Academy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/home.css">
+</head>
+<body>
+
+<div class="frame">
+  <canvas id="particle-canvas"></canvas>
+
+  <nav>
+    <div class="brand">
+      <button class="brand-mark" id="theme-menu-toggle" type="button" aria-label="Choose color theme" aria-expanded="false">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true">
+          <circle cx="11" cy="11" r="2.6" fill="currentColor"/>
+          <ellipse cx="11" cy="11" rx="10" ry="4.2" stroke="#74e8ff" stroke-width="1.2"/>
+          <ellipse cx="11" cy="11" rx="10" ry="4.2" stroke="#1689fe" stroke-width="1.2" transform="rotate(60 11 11)"/>
+          <ellipse cx="11" cy="11" rx="10" ry="4.2" stroke="#8b7cff" stroke-width="1.2" transform="rotate(120 11 11)"/>
+        </svg>
+      </button>
+      MAGNUS
+      <div class="theme-menu" id="theme-menu" role="menu" hidden>
+        <a href="?theme=light" role="menuitemradio" data-theme-choice="light" aria-checked="true">Light theme</a>
+        <a href="?theme=dark" role="menuitemradio" data-theme-choice="dark" aria-checked="false">Dark theme</a>
+      </div>
+    </div>
+
+    <div class="nav-links">
+      <a href="courses.html">Courses</a>
+      <a href="faculty.html">Faculty</a>
+      <a href="results.html">Results</a>
+    </div>
+
+    <div class="nav-actions">
+      <a class="btn-ghost" href="login.html">Student Login</a>
+    </div>
+  </nav>
+
+  <div class="hero">
+    <div class="hero-copy">
+      <h1 id="headline"></h1>
+      <p>Live doubt-clearing, personalised mark tracking, and a faculty team built around one goal — your rank.</p>
+      <div class="cta-row">
+        <button class="btn-primary">Start free trial <span class="arrow">↗</span></button>
+        <a class="btn-secondary" href="courses.html">Courses</a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="js/home.js"></script>
+</body>
+</html>

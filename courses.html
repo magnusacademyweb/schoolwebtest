@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Courses — Magnus Academy</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    .course-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:16px; margin-top:68px; }
+    .course-card { position:relative; min-height:500px; display:flex; flex-direction:column; padding:26px; overflow:hidden; border:1px solid var(--line); border-radius:26px; background:var(--surface); box-shadow:var(--shadow); backdrop-filter:blur(18px); transition:transform .25s ease,border-color .25s ease; }
+    .course-card:hover { transform:translateY(-5px); border-color:rgba(22,137,254,.38); }
+    .course-card::before { content:""; position:absolute; width:180px; height:180px; right:-48px; top:-42px; border-radius:50%; background:rgba(255,255,255,.27); filter:blur(2px); }
+    .course-card.jeem { background:linear-gradient(145deg,rgba(116,232,255,.3),var(--solid) 72%); }
+    .course-card.neet { background:linear-gradient(145deg,rgba(196,165,255,.3),var(--solid) 72%); }
+    .course-card.cbse { background:linear-gradient(145deg,rgba(255,208,130,.3),var(--solid) 72%); }
+    .course-card.foundation { background:linear-gradient(145deg,rgba(117,184,255,.3),var(--solid) 72%); }
+    html[data-theme="dark"] .course-card.jeem,html[data-theme="dark"] .course-card.neet,html[data-theme="dark"] .course-card.cbse,html[data-theme="dark"] .course-card.foundation { background:linear-gradient(145deg,rgba(40,74,110,.62),var(--solid) 75%); }
+    .card-top,.card-body,.card-bottom { position:relative; z-index:1; }
+    .card-top { display:flex; justify-content:space-between; align-items:center; }
+    .tag { padding:7px 10px; border-radius:999px; background:rgba(255,255,255,.45); font-size:.64rem; font-weight:800; letter-spacing:.1em; text-transform:uppercase; }
+    .number { color:var(--muted); font:600 .7rem ui-monospace,SFMono-Regular,Menlo,monospace; }
+    h2 { margin:0; font-size:1.7rem; letter-spacing:-.05em; }
+    .card-body { margin-top:92px; }
+    .course-copy { margin:14px 0 0; color:var(--muted); font-size:.86rem; line-height:1.7; }
+    .chips { display:flex; flex-wrap:wrap; gap:7px; margin-top:22px; }
+    .chip { padding:7px 9px; border:1px solid var(--line); border-radius:9px; background:rgba(255,255,255,.3); color:var(--muted); font-size:.65rem; font-weight:800; }
+    .card-bottom { display:flex; align-items:center; justify-content:space-between; gap:15px; margin-top:auto; padding-top:22px; border-top:1px solid var(--line); }
+    .card-bottom span { color:var(--ink); font-size:.72rem; font-weight:800; }
+    .arrow { color:var(--blue); font-size:1.2rem; transition:transform .25s ease; }
+    .course-card:hover .arrow { transform:translate(3px,-3px); }
+    .promise { display:grid; grid-template-columns:.8fr 1.2fr; gap:20px; margin-top:70px; padding:34px; border:1px solid rgba(255,255,255,.08); border-radius:26px; color:#fff; background:#0b1833; }
+    .promise h2 { max-width:390px; margin-top:14px; font-size:2.2rem; }
+    .promise p { max-width:560px; color:rgba(255,255,255,.63); font-size:.9rem; line-height:1.8; }
+    .promise-list { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; align-content:center; }
+    .promise-list div { padding:17px 0; border-top:1px solid rgba(255,255,255,.12); color:rgba(255,255,255,.78); font-size:.8rem; font-weight:700; }
+    .intro { max-width: 540px; }
+    @media(max-width:1120px) { .course-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+    @media(max-width:760px) { .course-grid{grid-template-columns:1fr;margin-top:46px}.promise{grid-template-columns:1fr;padding:26px}.promise-list{grid-template-columns:1fr} }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 26 26" fill="none"><circle cx="13" cy="13" r="3" fill="currentColor"/><ellipse cx="13" cy="13" rx="11.5" ry="4.7" stroke="#46D9FF" stroke-width="1.2"/><ellipse cx="13" cy="13" rx="11.5" ry="4.7" stroke="#328BFF" stroke-width="1.2" transform="rotate(60 13 13)"/><ellipse cx="13" cy="13" rx="11.5" ry="4.7" stroke="#8F7BFF" stroke-width="1.2" transform="rotate(120 13 13)"/></svg></span>MAGNUS</a>
+      <nav><a href="index.html">Home</a><a href="faculty.html">Faculty</a><a href="results.html">Results</a><a class="login-link" href="login.html">Student login ↗</a><button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle theme">☼</button></nav>
+      <button class="mobile-menu-toggle" id="mobile-menu-toggle" type="button" aria-label="Open navigation" aria-expanded="false">☰</button>
+      <div class="mobile-menu" id="mobile-menu"><a href="index.html">Home <span>↗</span></a><a href="faculty.html">Faculty <span>↗</span></a><a href="results.html">Results <span>↗</span></a><a href="login.html">Student login <span>↗</span></a></div>
+    </header>
+    <main>
+      <div class="kicker eyebrow">Choose your track</div>
+      <h1>A sharper plan for<br /><span class="gradient">the long game.</span></h1>
+      <p class="intro">One academy, four focused paths for competitive exams, school success, and strong academic foundations.</p>
+      <section class="course-grid" aria-label="Magnus courses">
+        <article class="course-card jeem"><div class="card-top"><span class="tag">JEE · 2026</span><span class="number">01</span></div><div class="card-body"><h2>The Rank Track</h2><p class="course-copy">A complete JEE Main and Advanced system for students who want a repeatable route to the top 5,000.</p><div class="chips"><span class="chip">Physics</span><span class="chip">Chemistry</span><span class="chip">Mathematics</span></div></div><div class="card-bottom"><span>Live classes · Weekly mocks</span><span class="arrow">↗</span></div></article>
+        <article class="course-card neet"><div class="card-top"><span class="tag">NEET · 2026</span><span class="number">02</span></div><div class="card-body"><h2>The Med Track</h2><p class="course-copy">High-retention biology and sharp problem solving for a calm, consistent climb toward medical college.</p><div class="chips"><span class="chip">Biology</span><span class="chip">Physics</span><span class="chip">Chemistry</span></div></div><div class="card-bottom"><span>NCERT deep dives · Doubt desk</span><span class="arrow">↗</span></div></article>
+        <article class="course-card cbse"><div class="card-top"><span class="tag">CBSE Boards · 2026</span><span class="number">03</span></div><div class="card-body"><h2>The Boards Track</h2><p class="course-copy">Clear chapter teaching, answer-writing practice, and exam-ready revision for confident CBSE board performance.</p><div class="chips"><span class="chip">Class 10</span><span class="chip">Class 12</span><span class="chip">All core subjects</span></div></div><div class="card-bottom"><span>Concepts · Sample papers</span><span class="arrow">↗</span></div></article>
+        <article class="course-card foundation"><div class="card-top"><span class="tag">Foundation · Grades 6–9</span><span class="number">04</span></div><div class="card-body"><h2>The Foundation</h2><p class="course-copy">Build strong habits and fundamentals for younger learners before higher-grade pressure starts moving fast.</p><div class="chips"><span class="chip">Concepts</span><span class="chip">Habits</span><span class="chip">Problem solving</span></div></div><div class="card-bottom"><span>Small cohorts · Mentor check-ins</span><span class="arrow">↗</span></div></article>
+      </section>
+      <section class="promise"><div><div class="eyebrow" style="color:#74e8ff">Inside every track</div><h2>A command center, not a content dump.</h2><p>Every course connects lessons, practice, doubt clearing, and score review into one weekly rhythm that tells you what to do next.</p></div><div class="promise-list"><div>Live concept rooms</div><div>Personal score map</div><div>Daily doubt desk</div><div>Full-length mocks</div></div></section>
+    </main>
+    <footer><span>MAGNUS ACADEMY · PRECISION COACHING</span><span>JEE · NEET · CONSISTENCY</span></footer>
+  </div>
+  <script src="js/site.js"></script>
+</body>
+</html>

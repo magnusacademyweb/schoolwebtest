@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Faculty — Magnus Academy</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    .intro { max-width: 510px; }
+    .faculty-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin-top: 68px; }
+    .faculty-card {
+      position: relative; overflow: hidden; min-height: 520px; padding: 30px;
+      border: 1px solid var(--line); border-radius: 26px; background: var(--surface);
+      box-shadow: var(--shadow); backdrop-filter: blur(18px);
+      transition: transform .25s ease, border-color .25s ease;
+    }
+    .faculty-card:hover { transform: translateY(-5px); border-color: rgba(22,137,254,.38); }
+    .faculty-card::after {
+      content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .42;
+      background-image: radial-gradient(circle at 82% 24%, rgba(255,255,255,.9) 0 1px, transparent 1.4px);
+      background-size: 19px 19px;
+    }
+    .card-top { position: relative; z-index: 1; display: flex; justify-content: space-between; align-items: flex-start; }
+    .subject { color: var(--muted); font-size: .68rem; font-weight: 800; letter-spacing: .15em; text-transform: uppercase; }
+    .years { color: var(--muted); font: 600 .7rem ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .staff-photo {
+      position: relative; z-index: 1; height: 190px; margin-top: 28px; overflow: hidden;
+      border: 1px solid rgba(255,255,255,.7); border-radius: 22px;
+      background: rgba(255,255,255,.28); color: #10213b; backdrop-filter: blur(12px);
+    }
+    .staff-photo img { display: none; width: 100%; height: 100%; object-fit: cover; }
+    .staff-photo.has-image img { display: block; }
+    .photo-placeholder { display: flex; height: 100%; align-items: center; justify-content: center; }
+    .staff-photo.has-image .photo-placeholder { display: none; }
+    .initials { display: grid; place-items: center; width: 78px; height: 78px; border: 1px solid rgba(255,255,255,.7); border-radius: 24px; background: rgba(255,255,255,.42); font-size: 1.5rem; font-weight: 800; }
+    .card-content { position: relative; z-index: 1; margin-top: 22px; }
+    h2 { margin: 0; font-size: 1.45rem; letter-spacing: -.04em; }
+    .specialty { margin: 7px 0 0; color: var(--muted); font-size: .8rem; font-weight: 700; }
+    .bio { max-width: 460px; margin: 15px 0 0; color: var(--muted); font-size: .86rem; line-height: 1.65; }
+    .card-footer { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 24px; padding-top: 17px; border-top: 1px solid var(--line); }
+    .exam { color: var(--ink); font-size: .7rem; font-weight: 800; }
+    .arrow { color: var(--blue); font-size: 1.1rem; transition: transform .25s ease; }
+    .faculty-card:hover .arrow { transform: translate(3px, -3px); }
+
+    .physics { background: linear-gradient(135deg, rgba(116,232,255,.26), var(--solid) 72%); }
+    .biology { background: linear-gradient(135deg, rgba(196,165,255,.30), var(--solid) 72%); }
+    .mathematics { background: linear-gradient(135deg, rgba(117,184,255,.28), var(--solid) 72%); }
+    .chemistry { background: linear-gradient(135deg, rgba(157,153,255,.28), var(--solid) 72%); }
+    html[data-theme="dark"] .physics,
+    html[data-theme="dark"] .biology,
+    html[data-theme="dark"] .mathematics,
+    html[data-theme="dark"] .chemistry { background: linear-gradient(135deg, rgba(40,74,110,.62), var(--solid) 75%); }
+
+    @media (max-width: 760px) {
+      .faculty-grid { grid-template-columns: 1fr; margin-top: 46px; }
+      .faculty-card { min-height: 500px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <a class="brand" href="index.html">
+        <span class="brand-mark" aria-hidden="true">
+          <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
+            <circle cx="13" cy="13" r="3" fill="currentColor"/>
+            <ellipse cx="13" cy="13" rx="11.5" ry="4.7" stroke="#46D9FF" stroke-width="1.2"/>
+            <ellipse cx="13" cy="13" rx="11.5" ry="4.7" stroke="#328BFF" stroke-width="1.2" transform="rotate(60 13 13)"/>
+            <ellipse cx="13" cy="13" rx="11.5" ry="4.7" stroke="#8F7BFF" stroke-width="1.2" transform="rotate(120 13 13)"/>
+          </svg>
+        </span>
+        MAGNUS
+      </a>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="courses.html">Courses</a>
+        <a href="results.html">Results</a>
+        <a class="login-link" href="login.html">Student login ↗</a>
+        <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle theme">☼</button>
+      </nav>
+      <button class="mobile-menu-toggle" id="mobile-menu-toggle" type="button" aria-label="Open navigation" aria-expanded="false">☰</button>
+      <div class="mobile-menu" id="mobile-menu">
+        <a href="index.html">Home <span>↗</span></a>
+        <a href="courses.html">Courses <span>↗</span></a>
+        <a href="results.html">Results <span>↗</span></a>
+        <a href="login.html">Student login <span>↗</span></a>
+      </div>
+    </header>
+
+    <main>
+      <div class="kicker eyebrow">The people behind the signal</div>
+      <h1>Four subjects.<br /><span class="gradient">One standard.</span></h1>
+      <p class="intro">Meet the faculty who make difficult ideas feel close, memorable, and useful when the paper gets difficult.</p>
+
+      <section class="faculty-grid" aria-label="Magnus faculty">
+        <article class="faculty-card physics">
+          <div class="card-top"><div class="subject">Physics</div><div class="years">18 years</div></div>
+          <div class="staff-photo" data-photo-key="physics">
+            <img alt="Aarav Kulkarni" />
+            <div class="photo-placeholder"><div class="initials">AK</div></div>
+          </div>
+          <div class="card-content"><h2>Aarav Kulkarni</h2><p class="specialty">Visual mechanics and first principles</p><p class="bio"><strong>What he does:</strong> Turns intimidating mechanics into a sequence your brain can actually hold.</p></div>
+          <div class="card-footer"><span class="exam">JEE Main + Advanced</span><span class="arrow">↗</span></div>
+        </article>
+        <article class="faculty-card biology">
+          <div class="card-top"><div class="subject">Biology</div><div class="years">14 years</div></div>
+          <div class="staff-photo" data-photo-key="biology">
+            <img alt="Meera Raghavan" />
+            <div class="photo-placeholder"><div class="initials">MR</div></div>
+          </div>
+          <div class="card-content"><h2>Meera Raghavan</h2><p class="specialty">NCERT-first memory systems</p><p class="bio"><strong>What she does:</strong> Builds recall that survives pressure, not just another quiet evening at a desk.</p></div>
+          <div class="card-footer"><span class="exam">NEET UG</span><span class="arrow">↗</span></div>
+        </article>
+        <article class="faculty-card mathematics">
+          <div class="card-top"><div class="subject">Mathematics</div><div class="years">16 years</div></div>
+          <div class="staff-photo" data-photo-key="mathematics">
+            <img alt="Siddharth Deshmukh" />
+            <div class="photo-placeholder"><div class="initials">SD</div></div>
+          </div>
+          <div class="card-content"><h2>Siddharth Deshmukh</h2><p class="specialty">Problem-solving intuition</p><p class="bio"><strong>What he does:</strong> Finds the one missing idea between an almost-right answer and a rank-changing one.</p></div>
+          <div class="card-footer"><span class="exam">JEE Main + Advanced</span><span class="arrow">↗</span></div>
+        </article>
+        <article class="faculty-card chemistry">
+          <div class="card-top"><div class="subject">Chemistry</div><div class="years">11 years</div></div>
+          <div class="staff-photo" data-photo-key="chemistry">
+            <img alt="Nandita Prasad" />
+            <div class="photo-placeholder"><div class="initials">NP</div></div>
+          </div>
+          <div class="card-content"><h2>Nandita Prasad</h2><p class="specialty">Concepts that stay connected</p><p class="bio"><strong>What she does:</strong> Makes the periodic table feel less like memorisation and more like a map.</p></div>
+          <div class="card-footer"><span class="exam">JEE + NEET</span><span class="arrow">↗</span></div>
+        </article>
+      </section>
+    </main>
+
+    <footer><span>MAGNUS ACADEMY · PRECISION COACHING</span><span>JEE · NEET · CONSISTENCY</span></footer>
+  </div>
+  <script src="js/site.js"></script>
+</body>
+</html>
