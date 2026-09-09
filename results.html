@@ -41,6 +41,7 @@
      .result-exam { color:var(--muted); font-size:.6rem; font-weight:800; letter-spacing:.1em; text-transform:uppercase; text-align:right; }
      .result-name { margin-top:28px; font-size:1.12rem; font-weight:800; letter-spacing:-.03em; }
      .result-card.is-placeholder .result-name { color:var(--muted); }
+     .repeat-label { display:inline-block; margin-left:7px; padding:4px 7px; border-radius:999px; background:rgba(119,100,235,.12); color:var(--violet); font-size:.56rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; vertical-align:middle; }
      .result-detail { margin:9px 0 25px; color:var(--muted); font-size:.76rem; line-height:1.6; }
      .result-score { margin-top:auto; padding:13px 14px; border-radius:13px; background:rgba(22,185,220,.1); }
      .result-score-label { color:var(--cyan); font-size:.59rem; font-weight:800; letter-spacing:.1em; text-transform:uppercase; }
@@ -122,23 +123,25 @@
         },
         "2025": {
           jee: [
-            { name: "Christfin Felix", detail: "JEE · 2025", primary: "JEE Percentage: 96.68%", facts: ["IIIT Kottayam — CSE"] }
+            { name: "Christfin Felix", detail: "JEE · 2025", primary: "JEE Percentage: 96.68%", facts: ["IIIT Kottayam — CSE"], repeat: true }
           ],
           neet: [
-            { name: "Venu P", detail: "NEET · 2025", primary: "NEET Score: 559", facts: ["Stanley Medical College"] },
-            { name: "Pujithaa M R", detail: "NEET · 2025", primary: "NEET Score: 498", facts: ["Mamtha Medical College"] },
-            { name: "Karthiga R", detail: "NEET · 2025", primary: "NEET Score: 478", facts: ["St Peters Medical College"] }
+            { name: "Venu P", detail: "NEET · 2025", primary: "NEET Score: 559", facts: ["Stanley Medical College"], repeat: true },
+            { name: "Pujithaa M R", detail: "NEET · 2025", primary: "NEET Score: 498", facts: ["Mamtha Medical College"], repeat: true },
+            { name: "Karthiga R", detail: "NEET · 2025", primary: "NEET Score: 478", facts: ["St Peters Medical College"], repeat: true }
           ]
         },
         "2026": {
           jee: [
             { name: "Aryan Raj", detail: "JEE · 2026", primary: "JEE Percentile: 91", facts: ["IIT Madras — BSMS Programme", "SNU Selected", "IISER Selected"] },
             { name: "Raghavi", detail: "JEE · 2026", primary: "JEE Percentile: 91", facts: ["VIT Selected — Category 1", "SNU Selected"] },
-            { name: "Magathi", detail: "JEE · 2026", primary: "JEE Percentile: 91", facts: ["NEET Score: 477", "BSMS Government Seat — Siddha", "IISER Selected"] },
             { name: "Sreelakshmi", detail: "JEE · 2026", primary: "JEE Percentile: 86", facts: ["PSG Coimbatore — Computational Finance"] },
             { name: "Spurthi", detail: "JEE · 2026", primary: "JEE Percentile: 86", facts: ["PES Bangalore — CSE"] }
           ],
-          neet: []
+          neet: [
+            { name: "Magathi", detail: "NEET · 2026", primary: "NEET Score: 477", facts: ["BSMS Government Seat — Siddha", "IISER Selected"] },
+            { name: "Raghavi", detail: "NEET · 2026", primary: "NEET Score: 432", facts: [] }
+          ]
         }
       };
 
@@ -156,8 +159,8 @@
         const examName = selectedExam.toUpperCase();
         resultsEyebrow.textContent = `${selectedYear} · ${examName}`;
         resultsTitle.textContent = `${examName} results`;
-        resultsCount.textContent = selectedYear === "2026" && selectedExam === "jee"
-          ? "5 selections · out of just 10 students"
+        resultsCount.textContent = selectedYear === "2026"
+          ? `${yearResults.length} result${yearResults.length === 1 ? "" : "s"} · out of just 10 students`
           : yearResults.length
             ? `${yearResults.length} result slot${yearResults.length === 1 ? "" : "s"}`
             : "No result slots yet";
@@ -191,7 +194,7 @@
                 <div class="result-number">${String(index + 1).padStart(2, "0")}</div>
                 <div class="result-exam">${result.detail}</div>
               </div>
-              <div class="result-name">${result.name}</div>
+              <div class="result-name">${result.name}${result.repeat ? ' <span class="repeat-label">Repeat</span>' : ""}</div>
               ${result.facts.length ? `<div class="result-facts">${result.facts.map((fact) => `<span class="result-fact">${fact}</span>`).join("")}</div>` : ""}
               ${result.quote ? `<p class="result-quote">“${result.quote}”</p>` : ""}
               <div class="result-score">
