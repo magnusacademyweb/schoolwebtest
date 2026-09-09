@@ -53,6 +53,14 @@
       <label>Roll Number <span style="font-weight:400;">(students only — leave blank if you're staff)</span></label>
       <input type="text" id="rollNumberInput" placeholder="e.g. 24BIO045">
     </div>
+    <div class="portal-field hidden" id="fullNameField">
+      <label>Full Name</label>
+      <input type="text" id="fullNameInput" placeholder="Your full name">
+    </div>
+    <div class="portal-field hidden" id="classField">
+      <label>Class</label>
+      <input type="text" id="classInput" placeholder="e.g. 12th - Batch A">
+    </div>
     <button class="portal-btn" id="authSubmitBtn">Log In</button>
     <div class="portal-toggle">
       <span id="toggleText">Don't have an account? <a id="toggleLink">Sign up</a></span>
@@ -124,6 +132,8 @@ function hideAll() {
 }
 
 const rollNumberField = document.getElementById('rollNumberField');
+const fullNameField = document.getElementById('fullNameField');
+const classField = document.getElementById('classField');
 
 function handleToggleClick() {
   isSignup = !isSignup;
@@ -133,6 +143,8 @@ function handleToggleClick() {
     ? `Already have an account? <a id="toggleLink">Log in</a>`
     : `Don't have an account? <a id="toggleLink">Sign up</a>`;
   rollNumberField.classList.toggle('hidden', !isSignup);
+  fullNameField.classList.toggle('hidden', !isSignup);
+  classField.classList.toggle('hidden', !isSignup);
   document.getElementById('toggleLink').addEventListener('click', handleToggleClick);
   clearMsg();
 }
@@ -150,10 +162,35 @@ authSubmitBtn.addEventListener('click', async () => {
 
   if (isSignup) {
     const enteredRoll = document.getElementById('rollNumberInput').value.trim();
+    const enteredName = document.getElementById('fullNameInput').value.trim();
+    const enteredClass = document.getElementById('classInput').value.trim();
+
     const { data, error } = await supabaseClient.auth.signUp({ email, password });
     if (error) { showMsg(error.message, 'error'); return; }
-    showMsg('Account created. Checking registration...', 'success');
-    await routeAfterAuth(enteredRoll);
+
+    if (enteredRoll) {
+      // Student self-registration: create their row now
+      if (!enteredName) { showMsg('Please enter your full name.', 'error'); return; }
+      const { error: insertError } = await supabaseClient
+        .from('students')
+        .insert({ roll_number: enteredRoll, full_name: enteredName, email: email, class: enteredClass || null });
+
+      if (insertError) {
+        if (insertError.message.includes('duplicate') || insertError.code === '23505') {
+          showMsg('That roll number is already registered. If this is a mistake, contact the office.', 'error');
+        } else {
+          showMsg('Could not create your student record: ' + insertError.message, 'error');
+        }
+        await supabaseClient.auth.signOut();
+        return;
+      }
+      showMsg('Account created!', 'success');
+      await routeAfterAuth(enteredRoll);
+    } else {
+      // No roll number entered = staff signup attempt; staff rows are added manually by an existing admin
+      showMsg('Account created. Checking staff registration...', 'success');
+      await routeAfterAuth(null);
+    }
   } else {
     const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
     if (error) { showMsg(error.message, 'error'); return; }
@@ -169,7 +206,7 @@ async function routeAfterAuth(enteredRoll) {
   const { data: adminRow } = await supabaseClient
     .from('admins')
     .select('*')
-    .eq('email', user.email)
+    .ilike('email', user.email)
     .maybeSingle();
 
   if (adminRow) {
@@ -183,7 +220,7 @@ async function routeAfterAuth(enteredRoll) {
   const { data: studentRow } = await supabaseClient
     .from('students')
     .select('*')
-    .eq('email', user.email)
+    .ilike('email', user.email)
     .maybeSingle();
 
   if (studentRow) {
