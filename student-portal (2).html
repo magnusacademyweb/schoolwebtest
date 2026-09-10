@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Portal — Marks</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#07070f;--surface:#0f0f1a;--surface2:#16162a;--surface3:#1c1c32;
+  --glass:rgba(255,255,255,0.04);--glass-border:rgba(255,255,255,0.08);
+  --accent:#6c63ff;--teal:#00d4aa;--red:#ff6b6b;--amber:#f7b731;
+  --text:#eeedf4;--text2:#9896b0;--text3:#5c5a75;
+  --radius:16px;--radius-sm:10px;
+}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
+header{
+  padding:24px 40px;border-bottom:1px solid var(--glass-border);
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;
+}
+.logo-text{font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:700;color:var(--accent);letter-spacing:-0.3px;}
+.logo-sub{font-size:11px;color:var(--text3);margin-top:2px;}
+.student-id{font-size:13px;color:var(--text2);}
+
+main{max-width:960px;margin:0 auto;padding:40px 40px 80px;}
+
+.page-greeting{font-family:'Space Grotesk',sans-serif;font-size:30px;font-weight:700;letter-spacing:-0.5px;margin-bottom:6px;}
+.page-sub{font-size:14px;color:var(--text2);margin-bottom:32px;}
+
+.summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-bottom:32px;}
+.stat-mini{
+  background:var(--glass);border:1px solid var(--glass-border);
+  border-radius:var(--radius);padding:20px 22px;
+}
+.sm-label{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px;}
+.sm-val{font-family:'JetBrains Mono',monospace;font-size:26px;font-weight:600;line-height:1;}
+
+.card{background:var(--glass);border:1px solid var(--glass-border);border-radius:var(--radius);padding:0;overflow:hidden;}
+.card-title-row{padding:20px 24px;border-bottom:1px solid var(--glass-border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+.card-title{font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:600;}
+
+.filter-row{display:flex;gap:8px;flex-wrap:wrap;}
+.tab-btn{padding:7px 14px;border-radius:50px;border:1px solid var(--glass-border);background:transparent;color:var(--text2);font-size:13px;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif;}
+.tab-btn:hover{border-color:var(--accent);color:var(--text);}
+.tab-btn.active{color:#fff;border-color:transparent;background:var(--accent);}
+
+table{width:100%;border-collapse:collapse;}
+thead th{
+  text-align:left;font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.8px;
+  padding:14px 24px;border-bottom:1px solid var(--glass-border);font-weight:600;
+}
+tbody td{padding:16px 24px;font-size:14px;border-bottom:1px solid var(--glass-border);}
+tbody tr:last-child td{border-bottom:none;}
+tbody tr:hover{background:var(--glass);}
+.subj-tag{display:inline-block;padding:3px 10px;border-radius:50px;font-size:12px;font-weight:500;}
+.subj-phy{background:rgba(108,99,255,0.15);color:#a29bfe;}
+.subj-chem{background:rgba(0,212,170,0.15);color:#00d4aa;}
+.subj-math{background:rgba(247,183,49,0.15);color:#f7b731;}
+.subj-bio{background:rgba(255,107,107,0.15);color:#ff6b6b;}
+.subj-other{background:rgba(255,255,255,0.08);color:var(--text2);}
+.mk-score{font-family:'JetBrains Mono',monospace;font-weight:600;}
+.mk-pct{font-family:'JetBrains Mono',monospace;color:var(--text2);font-size:13px;}
+.mk-good{color:var(--teal);}
+.mk-mid{color:var(--amber);}
+.mk-low{color:var(--red);}
+
+.empty-note{padding:40px 24px;text-align:center;color:var(--text3);font-size:14px;}
+.signout-btn{background:transparent;border:1px solid var(--glass-border);color:var(--text2);padding:8px 16px;border-radius:8px;font-size:13px;cursor:pointer;font-family:'Inter',sans-serif;}
+.signout-btn:hover{border-color:var(--accent);color:var(--text);}
+.loading-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;color:var(--text2);font-size:14px;}
+
+footer{padding:24px 40px;text-align:center;color:var(--text3);font-size:12px;border-top:1px solid var(--glass-border);}
+footer a{color:var(--accent);text-decoration:none;}
+
+@media (max-width:600px){
+  header,main{padding-left:20px;padding-right:20px;}
+  thead{display:none;}
+  table,tbody,tr,td{display:block;width:100%;}
+  tbody tr{border-bottom:1px solid var(--glass-border);padding:14px 24px;}
+  tbody td{padding:4px 0;border-bottom:none;}
+}
+</style>
+</head>
+<body>
+
+<div id="loadingScreen" class="loading-screen">Loading your marks…</div>
+
+<div id="portalContent" style="display:none;">
+
+<header>
+  <div>
+    <div class="logo-text">Magnus Academy</div>
+    <div class="logo-sub">Student Portal</div>
+  </div>
+  <div style="display:flex;align-items:center;gap:16px;">
+    <div class="student-id" id="student-id">—</div>
+    <button class="signout-btn" id="signOutBtn">Sign Out</button>
+  </div>
+</header>
+
+<main>
+  <div class="page-greeting">Your marks</div>
+  <div class="page-sub" id="page-sub">Updated by staff after each test.</div>
+
+  <div class="summary-grid" id="summary-grid"></div>
+
+  <div class="card">
+    <div class="card-title-row">
+      <div class="card-title">All results</div>
+      <div class="filter-row" id="filter-row"></div>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Subject</th>
+          <th>Exam</th>
+          <th>Score</th>
+          <th>Percentage</th>
+        </tr>
+      </thead>
+      <tbody id="marks-body"></tbody>
+    </table>
+  </div>
+</main>
+
+<footer>
+  Marks shown are for reference only — contact the office for official mark sheets. &nbsp;<a href="index.html">← Back to site</a>
+</footer>
+
+</div>
+
+<script>
+// ====== CONFIG: same Supabase project as login.html ======
+const SUPABASE_URL = "https://ahtfvmawujnpodjboiqo.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFodGZ2bWF3dWpucG9kamJvaXFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg5MzA4ODMsImV4cCI6MjEwNDUwNjg4M30.ex6dFn4qdLi3O9miTlUQTlFKpliL0Kv9KdoMDONrWKQ";
+// ============================================================
+
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let MARKS = [];
+const SUBJ_LABEL = {phy:'Physics', chem:'Chemistry', math:'Maths', bio:'Biology'};
+let activeFilter = 'all';
+
+function subjectTag(subjectName){
+  const s = (subjectName || '').toLowerCase();
+  if (s.includes('phy')) return 'phy';
+  if (s.includes('chem')) return 'chem';
+  if (s.includes('math')) return 'math';
+  if (s.includes('bio')) return 'bio';
+  return 'other';
+}
+
+function pctClass(pct){
+  if(pct >= 75) return 'mk-good';
+  if(pct >= 50) return 'mk-mid';
+  return 'mk-low';
+}
+
+function renderSummary(){
+  const el = document.getElementById('summary-grid');
+  if(!MARKS.length){ el.innerHTML = ''; return; }
+  const totalObtained = MARKS.reduce((a,m)=>a+m.obtained,0);
+  const totalMax = MARKS.reduce((a,m)=>a+m.max,0);
+  const overallPct = totalMax ? Math.round(totalObtained/totalMax*100) : 0;
+  const best = MARKS.reduce((a,m)=> (m.max? m.obtained/m.max : 0) > (a.max? a.obtained/a.max : 0) ? m : a, MARKS[0]);
+
+  el.innerHTML = `
+    <div class="stat-mini">
+      <div class="sm-label">Overall</div>
+      <div class="sm-val">${overallPct}%</div>
+    </div>
+    <div class="stat-mini">
+      <div class="sm-label">Tests recorded</div>
+      <div class="sm-val">${MARKS.length}</div>
+    </div>
+    <div class="stat-mini">
+      <div class="sm-label">Strongest subject</div>
+      <div class="sm-val" style="font-size:18px">${best ? best.subject : '—'}</div>
+    </div>
+  `;
+}
+
+function renderFilters(){
+  const subjects = ['all', ...new Set(MARKS.map(m=>m.tag))];
+  const el = document.getElementById('filter-row');
+  el.innerHTML = subjects.map(s=>`
+    <button class="tab-btn ${s===activeFilter?'active':''}" onclick="setFilter('${s}')">
+      ${s==='all' ? 'All' : SUBJ_LABEL[s] || s}
+    </button>`).join('');
+}
+
+function setFilter(s){
+  activeFilter = s;
+  renderFilters();
+  renderTable();
+}
+
+function renderTable(){
+  const body = document.getElementById('marks-body');
+  const rows = MARKS.filter(m => activeFilter==='all' || m.tag===activeFilter);
+  if(!rows.length){
+    body.innerHTML = `<tr><td colspan="5"><div class="empty-note">No marks recorded yet.</div></td></tr>`;
+    return;
+  }
+  body.innerHTML = rows.map(m=>{
+    const pct = m.max ? Math.round(m.obtained/m.max*100) : 0;
+    return `
+      <tr>
+        <td><span class="subj-tag subj-${m.tag}">${m.subject}</span></td>
+        <td>${m.test}</td>
+        <td><span class="mk-score">${m.obtained}/${m.max}</span></td>
+        <td><span class="mk-pct ${pctClass(pct)}">${pct}%</span></td>
+      </tr>`;
+  }).join('');
+}
+
+function renderAll(){
+  renderSummary();
+  renderFilters();
+  renderTable();
+}
+
+function showPortal(){
+  document.getElementById('loadingScreen').style.display = 'none';
+  document.getElementById('portalContent').style.display = 'block';
+}
+
+document.getElementById('signOutBtn').addEventListener('click', async () => {
+  await supabaseClient.auth.signOut();
+  window.location.href = 'login.html';
+});
+
+async function init(){
+  // Must be signed in — otherwise send back to login
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  if (!session) {
+    window.location.href = 'login.html';
+    return;
+  }
+
+  const email = session.user.email;
+
+  // Confirm this account is a registered student (RLS only returns their own row)
+  const { data: studentRow, error: studentErr } = await supabaseClient
+    .from('students')
+    .select('*')
+    .ilike('email', email)
+    .maybeSingle();
+
+  if (studentErr || !studentRow) {
+    // Not a student account (could be staff, or not registered) — let login.html route it correctly
+    window.location.href = 'login.html';
+    return;
+  }
+
+  document.getElementById('student-id').textContent =
+    `${studentRow.full_name} · ${studentRow.class || 'Class —'} · Roll No. ${studentRow.roll_number}`;
+  document.getElementById('page-sub').textContent = `Welcome, ${studentRow.full_name}. Updated by staff after each test.`;
+
+  // Fetch this student's marks (RLS restricts this to their own roll number)
+  const { data: marksRows, error: marksErr } = await supabaseClient
+    .from('marks')
+    .select('*')
+    .eq('roll_number', studentRow.roll_number);
+
+  MARKS = (marksRows || []).map(m => ({
+    subject: m.subject,
+    tag: subjectTag(m.subject),
+    test: m.exam_name,
+    obtained: m.marks_obtained,
+    max: m.max_marks,
+  }));
+
+  renderAll();
+  showPortal();
+}
+
+init();
+</script>
+
+</body>
+</html>
