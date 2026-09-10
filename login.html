@@ -78,7 +78,7 @@
   <div id="staffView" class="portal-card hidden">
     <h2>Staff Upload</h2>
     <p id="staffGreeting"></p>
-    <p style="font-size:0.9em;">Upload a CSV/Excel file with columns: <code>roll_number, subject, exam_name, marks_obtained, max_marks</code></p>
+    <p style="font-size:0.9em;">Upload a CSV/Excel file with one row per student per exam, and columns: <code>roll_number, exam_name, exam_date, Physics, Chemistry, Maths, Biology, max_marks</code>. Leave a subject blank if the student didn't take it.</p>
     <input type="file" id="fileInput" accept=".csv,.xlsx,.xls">
     <button class="portal-btn" id="uploadBtn" style="margin-top:12px;">Upload Marks</button>
     <div id="uploadStatus"></div>
@@ -230,6 +230,21 @@ async function routeAfterAuth(enteredRoll) {
 }
 
 // Staff upload handling
+function toISODate(raw){
+  if (raw instanceof Date) {
+    const y = raw.getFullYear(), m = String(raw.getMonth()+1).padStart(2,'0'), d = String(raw.getDate()).padStart(2,'0');
+    return `${y}-${m}-${d}`;
+  }
+  if (typeof raw === 'number' && window.XLSX && XLSX.SSF) {
+    const parsed = XLSX.SSF.parse_date_code(raw);
+    if (parsed) return `${parsed.y}-${String(parsed.m).padStart(2,'0')}-${String(parsed.d).padStart(2,'0')}`;
+  }
+  return raw ? String(raw).trim() : null; // assume text already in YYYY-MM-DD
+}
+
+// One column per subject in the sheet — each becomes its own row in the database
+const SUBJECT_COLUMNS = ['Physics', 'Chemistry', 'Maths', 'Biology'];
+
 document.getElementById('uploadBtn').addEventListener('click', () => {
   const fileInput = document.getElementById('fileInput');
   const status = document.getElementById('uploadStatus');
@@ -238,19 +253,34 @@ document.getElementById('uploadBtn').addEventListener('click', () => {
 
   const reader = new FileReader();
   reader.onload = async (e) => {
-    const wb = XLSX.read(e.target.result, { type: 'binary' });
+    const wb = XLSX.read(e.target.result, { type: 'binary', cellDates: true });
     const sheet = wb.Sheets[wb.SheetNames[0]];
     const rows = XLSX.utils.sheet_to_json(sheet);
 
     if (!rows.length) { status.textContent = 'No rows found in file.'; return; }
 
-    const records = rows.map(r => ({
-      roll_number: String(r.roll_number).trim(),
-      subject: r.subject,
-      exam_name: r.exam_name,
-      marks_obtained: Number(r.marks_obtained),
-      max_marks: Number(r.max_marks)
-    }));
+    const records = [];
+    rows.forEach(r => {
+      const rollNumber = String(r.roll_number).trim();
+      const examName = r.exam_name;
+      const examDate = toISODate(r.exam_date);
+      const maxMarks = Number(r.max_marks);
+
+      SUBJECT_COLUMNS.forEach(subject => {
+        const raw = r[subject];
+        if (raw === undefined || raw === null || raw === '') return; // subject not taken — skip
+        records.push({
+          roll_number: rollNumber,
+          subject: subject,
+          exam_name: examName,
+          exam_date: examDate,
+          marks_obtained: Number(raw),
+          max_marks: maxMarks
+        });
+      });
+    });
+
+    if (!records.length) { status.textContent = 'No subject marks found in file.'; return; }
 
     status.textContent = `Uploading ${records.length} rows...`;
     const { error } = await supabaseClient.from('marks').insert(records);
