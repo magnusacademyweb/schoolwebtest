@@ -74,17 +74,6 @@
     <button class="portal-btn" id="signOutBtn1">Sign Out</button>
   </div>
 
-  <!-- STUDENT DASHBOARD -->
-  <div id="studentView" class="portal-card hidden">
-    <h2>My Marks</h2>
-    <p id="studentGreeting"></p>
-    <table class="marks-table" id="marksTable">
-      <thead><tr><th>Exam</th><th>Subject</th><th>Marks</th><th>Max</th></tr></thead>
-      <tbody id="marksBody"></tbody>
-    </table>
-    <button class="portal-btn" id="signOutBtn2" style="margin-top:20px;">Sign Out</button>
-  </div>
-
   <!-- STAFF DASHBOARD -->
   <div id="staffView" class="portal-card hidden">
     <h2>Staff Upload</h2>
@@ -111,7 +100,6 @@ let isSignup = false;
 
 const authView = document.getElementById('authView');
 const notRegisteredView = document.getElementById('notRegisteredView');
-const studentView = document.getElementById('studentView');
 const staffView = document.getElementById('staffView');
 const authMsg = document.getElementById('authMsg');
 const authTitle = document.getElementById('authTitle');
@@ -127,7 +115,6 @@ function clearMsg() { authMsg.innerHTML = ''; }
 function hideAll() {
   authView.classList.add('hidden');
   notRegisteredView.classList.add('hidden');
-  studentView.classList.add('hidden');
   staffView.classList.add('hidden');
 }
 
@@ -232,35 +219,14 @@ async function routeAfterAuth(enteredRoll) {
       showMsg("That roll number doesn't match our records for this email. Please check and try again, or contact the office.", 'error');
       return;
     }
-    hideAll();
-    studentView.classList.remove('hidden');
-    document.getElementById('studentGreeting').textContent = `Welcome, ${studentRow.full_name}`;
-    await loadMarks(studentRow.roll_number);
+    // Students go to the dedicated marks portal, not an inline view here
+    window.location.href = 'student-portal.html';
     return;
   }
 
   // Not found in either table
   hideAll();
   notRegisteredView.classList.remove('hidden');
-}
-
-async function loadMarks(rollNumber) {
-  const { data: marks, error } = await supabaseClient
-    .from('marks')
-    .select('*')
-    .eq('roll_number', rollNumber);
-
-  const tbody = document.getElementById('marksBody');
-  tbody.innerHTML = '';
-  if (marks && marks.length) {
-    marks.forEach(m => {
-      const tr = document.createElement('tr');
-      tr.innerHTML = `<td>${m.exam_name}</td><td>${m.subject}</td><td>${m.marks_obtained}</td><td>${m.max_marks}</td>`;
-      tbody.appendChild(tr);
-    });
-  } else {
-    tbody.innerHTML = '<tr><td colspan="4">No marks uploaded yet.</td></tr>';
-  }
 }
 
 // Staff upload handling
@@ -298,7 +264,7 @@ document.getElementById('uploadBtn').addEventListener('click', () => {
 });
 
 // Sign out
-['signOutBtn1', 'signOutBtn2', 'signOutBtn3'].forEach(id => {
+['signOutBtn1', 'signOutBtn3'].forEach(id => {
   document.getElementById(id).addEventListener('click', async () => {
     await supabaseClient.auth.signOut();
     hideAll();
