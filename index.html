@@ -8,6 +8,82 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/home.css">
+<style>
+  .contact-section {
+    width: min(1120px, calc(100% - 40px));
+    margin: 30px auto 72px;
+    padding: 42px 0 0;
+    text-align: center;
+  }
+  .contact-kicker {
+    margin: 0 auto 26px;
+    color: var(--muted, rgba(16,33,59,.62));
+    font-size: .8rem;
+    font-weight: 700;
+    letter-spacing: .02em;
+  }
+  .contact-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+  }
+  .contact-card {
+    display: flex;
+    min-height: 215px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 26px 20px;
+    border: 1px solid var(--line, rgba(20,55,100,.14));
+    border-radius: 22px;
+    background: var(--surface, rgba(255,255,255,.74));
+    box-shadow: var(--shadow, 0 22px 60px rgba(36,78,130,.12));
+    color: var(--ink, #10213b);
+    text-decoration: none;
+    transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease;
+  }
+  .contact-card:hover,
+  .contact-card:focus-visible {
+    transform: translateY(-5px);
+    border-color: var(--cyan, #16b9dc);
+    box-shadow: 0 24px 68px rgba(36,78,130,.2);
+    outline: none;
+  }
+  .contact-icon {
+    display: grid;
+    place-items: center;
+    width: 58px;
+    height: 58px;
+    margin-bottom: 17px;
+    border-radius: 50%;
+    color: #fff;
+  }
+  .contact-icon svg { width: 25px; height: 25px; }
+  .contact-card.call .contact-icon { background: linear-gradient(135deg, #ff7077, #f04e68); }
+  .contact-card.email .contact-icon { background: linear-gradient(135deg, #51cbbb, #25a997); }
+  .contact-card.visit .contact-icon { background: linear-gradient(135deg, #ffc34f, #f29a1c); }
+  .contact-card h2 { margin: 0; font-size: 1.1rem; letter-spacing: -.03em; }
+  .contact-value { max-width: 240px; margin: 9px 0 0; color: var(--muted, rgba(16,33,59,.62)); font-size: .78rem; line-height: 1.55; }
+  .contact-action { margin-top: 6px; color: var(--muted, rgba(16,33,59,.62)); font-size: .7rem; }
+  .site-footer {
+    display: flex;
+    width: min(1120px, calc(100% - 40px));
+    justify-content: space-between;
+    gap: 20px;
+    margin: 0 auto;
+    padding: 22px 0 30px;
+    border-top: 1px solid var(--line, rgba(20,55,100,.14));
+    color: var(--muted, rgba(16,33,59,.62));
+    font-size: .7rem;
+  }
+  .site-footer strong { color: var(--ink, #10213b); }
+  @media (max-width: 760px) {
+    .contact-section { width: min(100% - 28px, 520px); margin-top: 12px; padding-top: 28px; }
+    .contact-grid { grid-template-columns: 1fr; gap: 12px; }
+    .contact-card { min-height: 175px; }
+    .site-footer { width: min(100% - 28px, 520px); flex-direction: column; gap: 8px; }
+  }
+</style>
 </head>
 <body>
 
@@ -35,6 +111,7 @@
       <a href="courses.html">Courses</a>
       <a href="faculty.html">Faculty</a>
       <a href="results.html">Results</a>
+      <a href="#contact">Contact</a>
     </div>
 
     <div class="nav-actions">
@@ -54,6 +131,41 @@
 
   </div>
 </div>
+
+<section class="contact-section" id="contact" aria-labelledby="contact-title">
+  <p class="contact-kicker" id="contact-title">We’re here to help and answer any questions you might have.</p>
+  <div class="contact-grid">
+    <a class="contact-card call" href="tel:+918122561026" aria-label="Call Magnus Academy">
+      <span class="contact-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M7.2 3.8 9.7 6.3 8 9.1c1 2 2.5 3.5 4.5 4.5l2.8-1.7 2.5 2.5c.5.5.5 1.3 0 1.8l-1.1 1.1c-.6.6-1.4.8-2.2.6-5.2-1.4-9.1-5.3-10.5-10.5-.2-.8 0-1.6.6-2.2l1.1-1.1c.2-.3.8-.7 1.5-.3Z" fill="currentColor"/></svg>
+      </span>
+      <h2>Call Us</h2>
+      <p class="contact-value">+91 8122561026</p>
+      <span class="contact-action">Click to call directly</span>
+    </a>
+    <a class="contact-card email" href="mailto:info@magnusacademy.in" aria-label="Email Magnus Academy">
+      <span class="contact-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M3.5 6.5h17v11h-17v-11Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="m4.2 7.2 7.8 6 7.8-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </span>
+      <h2>Email Us</h2>
+      <p class="contact-value">info@magnusacademy.in</p>
+      <span class="contact-action">Click to send an email</span>
+    </a>
+    <a class="contact-card visit" href="https://www.google.com/maps/search/?api=1&amp;query=Siddharth+Village+School%2C+Hosur%2C+Krishnagiri" target="_blank" rel="noopener" aria-label="View Magnus Academy location">
+      <span class="contact-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M19 10.1c0 4.5-7 10.2-7 10.2S5 14.6 5 10.1a7 7 0 1 1 14 0Z" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="10" r="2.2" fill="currentColor"/></svg>
+      </span>
+      <h2>Visit Us</h2>
+      <p class="contact-value">Siddharth Village School, Hosur,<br />Krishnagiri.</p>
+      <span class="contact-action">Click to view location</span>
+    </a>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <span>© 2026 Magnus Academy. All rights reserved.</span>
+  <span>Made by <strong>Adithiyaa</strong></span>
+</footer>
 
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
