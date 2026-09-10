@@ -9,6 +9,17 @@
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/home.css">
 <style>
+  /* Override home.css's body flex-centering: that layout only works when
+     .frame is the page's only content. Now that a contact section and
+     footer follow it, body needs to be a normal top-to-bottom flow. */
+  body {
+    display: block !important;
+    min-height: auto !important;
+    padding: 22px 22px 0 !important;
+  }
+  .frame {
+    margin: 0 auto;
+  }
   .contact-section {
     width: min(1120px, calc(100% - 40px));
     margin: 30px auto 72px;
