@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>About — Magnus Academy</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    .about-hero { display: grid; grid-template-columns: minmax(0,1.1fr) minmax(280px,.9fr); gap: 40px; align-items: center; margin-top: 40px; }
+    .hero-card { position: relative; min-height: 220px; padding: 26px; overflow: hidden; border-radius: 22px; background: #0b1833; color: #fff; box-shadow: var(--shadow); }
+    .hero-card h2 { max-width: 260px; margin: 0 0 14px; font-size: 1.3rem; line-height: 1.15; letter-spacing: -.03em; }
+    .hero-card p { max-width: 270px; margin: 0; color: rgba(255,255,255,.68); font-size: .8rem; line-height: 1.65; }
+    .experience { display: inline-block; margin-top: 18px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,.18); color: rgba(255,255,255,.78); font-size: .68rem; font-weight: 700; }
+    .intro { max-width: 620px; }
+    .section { padding: 56px 0; border-top: 1px solid var(--line); }
+    .section-heading { max-width: 680px; margin-bottom: 26px; }
+    .section-heading h2 { margin: 0 0 14px; font-size: clamp(1.7rem, 3.2vw, 2.4rem); line-height: 1.08; letter-spacing: -.045em; }
+    .section-heading p { margin: 0; color: var(--muted); line-height: 1.75; font-size: .86rem; }
+    .mission-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 16px; }
+    .info-card { min-height: 168px; padding: 22px; border: 1px solid var(--line); border-radius: 18px; background: var(--surface); box-shadow: var(--shadow); backdrop-filter: blur(18px); }
+    .info-number { display: inline-grid; width: 30px; height: 30px; margin-bottom: 15px; place-items: center; border-radius: 50%; color: #fff; background: linear-gradient(135deg, var(--blue), var(--cyan)); font-size: .64rem; font-weight: 800; }
+    .info-card:nth-child(2) .info-number { background: linear-gradient(135deg, var(--violet), #b275e8); }
+    .info-card:nth-child(3) .info-number { background: linear-gradient(135deg, #ef9d3a, #f06c7c); }
+    .info-card h3 { margin: 0 0 8px; font-size: .96rem; letter-spacing: -.02em; }
+    .info-card p { margin: 0; color: var(--muted); font-size: .78rem; line-height: 1.65; }
+    .offer-grid { display: grid; grid-template-columns: .8fr 1.2fr; gap: 48px; align-items: start; }
+    .offer-list { display: grid; gap: 4px; }
+    .offer-item { display: flex; gap: 16px; padding: 16px 0; border-bottom: 1px solid var(--line); }
+    .offer-item:first-child { padding-top: 0; }
+    .offer-icon { flex: 0 0 auto; display: grid; width: 36px; height: 36px; place-items: center; border-radius: 10px; color: var(--blue); background: rgba(22,137,254,.1); font-weight: 800; font-size: .8rem; }
+    .offer-item h3 { margin: 0 0 4px; font-size: .9rem; }
+    .offer-item p { margin: 0; color: var(--muted); font-size: .76rem; line-height: 1.65; }
+    .closing { margin-bottom: 10px; padding: 34px; border: 1px solid var(--line); border-radius: 22px; background: var(--surface); box-shadow: var(--shadow); backdrop-filter: blur(18px); text-align: center; }
+    .closing h2 { margin: 0 0 12px; font-size: clamp(1.7rem, 3.2vw, 2.4rem); letter-spacing: -.045em; }
+    .closing p { max-width: 620px; margin: 0 auto 24px; color: var(--muted); font-size: .82rem; line-height: 1.75; }
+    .cta { display: inline-flex; padding: 13px 20px; border-radius: 999px; color: #fff; background: var(--ink); font-size: .78rem; font-weight: 800; }
+    html[data-theme="dark"] .cta { color: var(--page); }
+    @media (max-width: 760px) {
+      .about-hero, .offer-grid { grid-template-columns: 1fr; }
+      .mission-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 26 26" fill="none"><circle cx="13" cy="13" r="3" fill="currentColor"/><ellipse cx="13" cy="13" rx="11.5" ry="4.7" stroke="#46D9FF" stroke-width="1.2"/><ellipse cx="13" cy="13" rx="11.5" ry="4.7" stroke="#328BFF" stroke-width="1.2" transform="rotate(60 13 13)"/><ellipse cx="13" cy="13" rx="11.5" ry="4.7" stroke="#8F7BFF" stroke-width="1.2" transform="rotate(120 13 13)"/></svg></span>MAGNUS</a>
+      <nav><a href="index.html">Home</a><a href="courses.html">Courses</a><a href="faculty.html">Faculty</a><a href="results.html">Results</a><a class="login-link" href="login.html">Student login ↗</a><button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle theme">☼</button></nav>
+      <button class="mobile-menu-toggle" id="mobile-menu-toggle" type="button" aria-label="Open navigation" aria-expanded="false">☰</button>
+      <div class="mobile-menu" id="mobile-menu"><a href="index.html">Home <span>↗</span></a><a href="courses.html">Courses <span>↗</span></a><a href="faculty.html">Faculty <span>↗</span></a><a href="results.html">Results <span>↗</span></a><a href="login.html">Student login <span>↗</span></a></div>
+    </header>
+
+    <main>
+      <div class="about-hero">
+        <div>
+          <div class="kicker eyebrow">For parents who want more than promises</div>
+          <h1 style="font-size:clamp(2.15rem,4.6vw,3.6rem); margin:20px 0 16px;">Give your child a clear plan, personal attention, and the confidence to succeed.</h1>
+          <p class="intro">Choosing the right academy is a big decision. At Magnus Academy, your child gets more than classes: they get a structured path, experienced guidance, regular feedback, and the support needed to prepare seriously for NEET or JEE.</p>
+        </div>
+        <aside class="hero-card" aria-label="Magnus Academy highlights">
+          <h2>Your child's progress should never be a mystery.</h2>
+          <p>Regular assessments, performance tracking, and doubt-clearing help identify what your child understands, where they need help, and what to work on next.</p>
+          <div class="experience">20+ years of proven guidance</div>
+        </aside>
+      </div>
+
+      <section class="section" aria-labelledby="mission-title">
+        <div class="section-heading">
+          <p class="eyebrow">What your child gets</p>
+          <h2 id="mission-title">Support that turns hard work into visible progress.</h2>
+          <p>Every parent wants to know that their child is moving forward. Our system is built to help students understand their subjects, correct their weak areas, and build the discipline needed for a competitive exam.</p>
+        </div>
+        <div class="mission-grid">
+          <article class="info-card">
+            <span class="info-number">01</span>
+            <h3>Real understanding</h3>
+            <p>Your child learns the ideas behind each question, so they can solve unfamiliar problems instead of depending only on memorised answers.</p>
+          </article>
+          <article class="info-card">
+            <span class="info-number">02</span>
+            <h3>Personal attention</h3>
+            <p>Individualised guidance helps your child recognise their strengths, address weak areas, and know exactly what to improve next.</p>
+          </article>
+          <article class="info-card">
+            <span class="info-number">03</span>
+            <h3>A disciplined routine</h3>
+            <p>Study plans, regular tests, mock exams, and doubt-clearing sessions help your child prepare consistently instead of studying only when exams are near.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="approach-title">
+        <div class="offer-grid">
+          <div class="section-heading">
+            <p class="eyebrow">How we help</p>
+            <h2 id="approach-title">A system parents can trust and students can follow.</h2>
+            <p>Our experienced faculty combines proven methods with the regular structure students need to stay focused, improve steadily, and face the exam with confidence.</p>
+          </div>
+          <div class="offer-list">
+            <article class="offer-item"><span class="offer-icon">01</span><div><h3>A clear preparation plan</h3><p>Focused NEET and JEE courses give your child a defined path instead of leaving them to guess what to study next.</p></div></article>
+            <article class="offer-item"><span class="offer-icon">02</span><div><h3>Learning that lasts</h3><p>Lessons connect core concepts to challenging problems, helping your child think clearly and apply what they learn.</p></div></article>
+            <article class="offer-item"><span class="offer-icon">03</span><div><h3>Progress you can see</h3><p>Regular tests and performance tracking show where your child is improving and where more attention is needed.</p></div></article>
+            <article class="offer-item"><span class="offer-icon">04</span><div><h3>Confidence under pressure</h3><p>Mentors build discipline, resilience, and problem-solving confidence so your child can handle difficult questions and setbacks.</p></div></article>
+          </div>
+        </div>
+      </section>
+
+      <section class="closing" aria-labelledby="closing-title">
+        <h2 id="closing-title">Your child's future deserves the right support.</h2>
+        <p>With the right plan and guidance, students can move from confusion to clarity, from hesitation to confidence, and from effort to meaningful progress. Talk to Magnus Academy about the next step.</p>
+        <a class="cta" href="index.html#contact">Talk to Magnus Academy ↗</a>
+      </section>
+    </main>
+
+    <footer><span>© 2026 Magnus Academy. All rights reserved.</span><span>Made by <strong>Adithiyaa</strong></span></footer>
+  </div>
+  <script src="js/site.js"></script>
+</body>
+</html>
