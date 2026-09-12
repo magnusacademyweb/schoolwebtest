@@ -9,14 +9,14 @@
   const saved = localStorage.getItem('magnus-theme');
   if (saved === 'dark') root.dataset.theme = 'dark';
 
-  const toggleBtn = document.getElementById('theme-toggle');
-  if (toggleBtn) {
-    toggleBtn.addEventListener('click', () => {
+  const toggleBtns = document.querySelectorAll('.theme-toggle, .theme-toggle-mobile');
+  toggleBtns.forEach((btn) => {
+    btn.addEventListener('click', () => {
       const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
       root.dataset.theme = next;
       localStorage.setItem('magnus-theme', next);
     });
-  }
+  });
 })();
 
 // Mobile menu open/close
@@ -32,7 +32,7 @@
     mobileMenuToggle.textContent = open ? '×' : '☰';
   });
 
-  mobileMenuEl.querySelectorAll('a').forEach((link) => link.addEventListener('click', () => {
+  mobileMenuEl.querySelectorAll('a, .theme-toggle-mobile').forEach((link) => link.addEventListener('click', () => {
     mobileMenuEl.classList.remove('open');
     mobileMenuToggle.setAttribute('aria-expanded', 'false');
     mobileMenuToggle.setAttribute('aria-label', 'Open navigation');
