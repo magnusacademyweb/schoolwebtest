@@ -74,11 +74,22 @@
     <button class="portal-btn" id="signOutBtn1">Sign Out</button>
   </div>
 
+  <!-- STUDENT DASHBOARD -->
+  <div id="studentView" class="portal-card hidden">
+    <h2>My Marks</h2>
+    <p id="studentGreeting"></p>
+    <table class="marks-table" id="marksTable">
+      <thead><tr><th>Exam</th><th>Subject</th><th>Marks</th><th>Max</th></tr></thead>
+      <tbody id="marksBody"></tbody>
+    </table>
+    <button class="portal-btn" id="signOutBtn2" style="margin-top:20px;">Sign Out</button>
+  </div>
+
   <!-- STAFF DASHBOARD -->
   <div id="staffView" class="portal-card hidden">
     <h2>Staff Upload</h2>
     <p id="staffGreeting"></p>
-    <p style="font-size:0.9em;">Upload a CSV/Excel file with one row per student per exam, and columns: <code>roll_number, exam_name, exam_date, Physics, Chemistry, Maths, Biology, max_marks</code>. Leave a subject blank if the student didn't take it.</p>
+    <p style="font-size:0.9em;">Upload a CSV/Excel file with columns: <code>roll_number, subject, exam_name, marks_obtained</code> (and optionally <code>max_marks</code> — if you leave it out, it's auto-filled: JEE subjects (Physics/Chemistry/Maths) = 100 each, NEET Physics/Chemistry = 180, NEET Biology = 360, as long as your <code>exam_name</code> mentions "JEE" or "NEET").</p>
     <input type="file" id="fileInput" accept=".csv,.xlsx,.xls">
     <button class="portal-btn" id="uploadBtn" style="margin-top:12px;">Upload Marks</button>
     <div id="uploadStatus"></div>
@@ -100,6 +111,7 @@ let isSignup = false;
 
 const authView = document.getElementById('authView');
 const notRegisteredView = document.getElementById('notRegisteredView');
+const studentView = document.getElementById('studentView');
 const staffView = document.getElementById('staffView');
 const authMsg = document.getElementById('authMsg');
 const authTitle = document.getElementById('authTitle');
@@ -115,6 +127,7 @@ function clearMsg() { authMsg.innerHTML = ''; }
 function hideAll() {
   authView.classList.add('hidden');
   notRegisteredView.classList.add('hidden');
+  studentView.classList.add('hidden');
   staffView.classList.add('hidden');
 }
 
@@ -186,8 +199,14 @@ authSubmitBtn.addEventListener('click', async () => {
 });
 
 async function routeAfterAuth(enteredRoll) {
-  const { data: { user } } = await supabaseClient.auth.getUser();
-  if (!user) return;
+  const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
+  if (!user || userError) {
+    // Session is stale (e.g. the account was deleted) — clear it and show the login form
+    await supabaseClient.auth.signOut();
+    hideAll();
+    authView.classList.remove('hidden');
+    return;
+  }
 
   // Check admins table first (staff don't need a roll number)
   const { data: adminRow } = await supabaseClient
@@ -219,8 +238,10 @@ async function routeAfterAuth(enteredRoll) {
       showMsg("That roll number doesn't match our records for this email. Please check and try again, or contact the office.", 'error');
       return;
     }
-    // Students go to the dedicated marks portal, not an inline view here
-    window.location.href = 'student-portal.html';
+    hideAll();
+    studentView.classList.remove('hidden');
+    document.getElementById('studentGreeting').textContent = `Welcome, ${studentRow.full_name}`;
+    await loadMarks(studentRow.roll_number);
     return;
   }
 
@@ -229,22 +250,41 @@ async function routeAfterAuth(enteredRoll) {
   notRegisteredView.classList.remove('hidden');
 }
 
-// Staff upload handling
-function toISODate(raw){
-  if (raw instanceof Date) {
-    const y = raw.getFullYear(), m = String(raw.getMonth()+1).padStart(2,'0'), d = String(raw.getDate()).padStart(2,'0');
-    return `${y}-${m}-${d}`;
+async function loadMarks(rollNumber) {
+  const { data: marks, error } = await supabaseClient
+    .from('marks')
+    .select('*')
+    .eq('roll_number', rollNumber);
+
+  const tbody = document.getElementById('marksBody');
+  tbody.innerHTML = '';
+  if (marks && marks.length) {
+    marks.forEach(m => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${m.exam_name}</td><td>${m.subject}</td><td>${m.marks_obtained}</td><td>${m.max_marks}</td>`;
+      tbody.appendChild(tr);
+    });
+  } else {
+    tbody.innerHTML = '<tr><td colspan="4">No marks uploaded yet.</td></tr>';
   }
-  if (typeof raw === 'number' && window.XLSX && XLSX.SSF) {
-    const parsed = XLSX.SSF.parse_date_code(raw);
-    if (parsed) return `${parsed.y}-${String(parsed.m).padStart(2,'0')}-${String(parsed.d).padStart(2,'0')}`;
-  }
-  return raw ? String(raw).trim() : null; // assume text already in YYYY-MM-DD
 }
 
-// One column per subject in the sheet — each becomes its own row in the database
-const SUBJECT_COLUMNS = ['Physics', 'Chemistry', 'Maths', 'Biology'];
+// Standard max marks for JEE Main and NEET, used to auto-fill max_marks
+// when a staff upload doesn't specify it.
+const STANDARD_MAX_MARKS = {
+  jee: { physics: 100, chemistry: 100, maths: 100, mathematics: 100 },
+  neet: { physics: 180, chemistry: 180, biology: 360, botany: 180, zoology: 180 }
+};
 
+function guessMaxMarks(examName, subject) {
+  const exam = (examName || '').toLowerCase();
+  const subj = (subject || '').toLowerCase().trim();
+  const examType = exam.includes('neet') ? 'neet' : (exam.includes('jee') ? 'jee' : null);
+  if (!examType) return null;
+  return STANDARD_MAX_MARKS[examType][subj] || null;
+}
+
+// Staff upload handling
 document.getElementById('uploadBtn').addEventListener('click', () => {
   const fileInput = document.getElementById('fileInput');
   const status = document.getElementById('uploadStatus');
@@ -253,48 +293,58 @@ document.getElementById('uploadBtn').addEventListener('click', () => {
 
   const reader = new FileReader();
   reader.onload = async (e) => {
-    const wb = XLSX.read(e.target.result, { type: 'binary', cellDates: true });
+    const wb = XLSX.read(e.target.result, { type: 'binary' });
     const sheet = wb.Sheets[wb.SheetNames[0]];
     const rows = XLSX.utils.sheet_to_json(sheet);
 
     if (!rows.length) { status.textContent = 'No rows found in file.'; return; }
 
+    const skippedRows = [];
     const records = [];
-    rows.forEach(r => {
-      const rollNumber = String(r.roll_number).trim();
-      const examName = r.exam_name;
-      const examDate = toISODate(r.exam_date);
-      const maxMarks = Number(r.max_marks);
 
-      SUBJECT_COLUMNS.forEach(subject => {
-        const raw = r[subject];
-        if (raw === undefined || raw === null || raw === '') return; // subject not taken — skip
-        records.push({
-          roll_number: rollNumber,
-          subject: subject,
-          exam_name: examName,
-          exam_date: examDate,
-          marks_obtained: Number(raw),
-          max_marks: maxMarks
-        });
+    rows.forEach((r, i) => {
+      let maxMarks = r.max_marks !== undefined && r.max_marks !== '' ? Number(r.max_marks) : null;
+
+      if (!maxMarks) {
+        maxMarks = guessMaxMarks(r.exam_name, r.subject);
+      }
+
+      if (!maxMarks) {
+        skippedRows.push(i + 2); // +2: 1-indexed + header row
+        return;
+      }
+
+      records.push({
+        roll_number: String(r.roll_number).trim(),
+        subject: r.subject,
+        exam_name: r.exam_name,
+        marks_obtained: Number(r.marks_obtained),
+        max_marks: maxMarks
       });
     });
 
-    if (!records.length) { status.textContent = 'No subject marks found in file.'; return; }
+    if (!records.length) {
+      status.textContent = "Couldn't determine max marks for any row — either fill in a max_marks column, or make sure exam_name mentions 'JEE' or 'NEET' so it can be auto-filled.";
+      return;
+    }
 
     status.textContent = `Uploading ${records.length} rows...`;
     const { error } = await supabaseClient.from('marks').insert(records);
     if (error) {
       status.textContent = 'Upload failed: ' + error.message;
     } else {
-      status.textContent = `Successfully uploaded ${records.length} rows.`;
+      let msg = `Successfully uploaded ${records.length} rows.`;
+      if (skippedRows.length) {
+        msg += ` Skipped row(s) ${skippedRows.join(', ')} — couldn't determine max marks for those (no max_marks given and exam_name/subject wasn't recognized as JEE or NEET).`;
+      }
+      status.textContent = msg;
     }
   };
   reader.readAsBinaryString(file);
 });
 
 // Sign out
-['signOutBtn1', 'signOutBtn3'].forEach(id => {
+['signOutBtn1', 'signOutBtn2', 'signOutBtn3'].forEach(id => {
   document.getElementById(id).addEventListener('click', async () => {
     await supabaseClient.auth.signOut();
     hideAll();
